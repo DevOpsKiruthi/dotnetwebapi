@@ -1,0 +1,32 @@
+/* Home.css */
+
+.home_container {
+    position: relative;
+    height: 100vh; /* Set the height of the container to cover the entire viewport */
+    background-image: url('../assets/grocery.jpg');
+    background-size: cover; /* Ensure the image covers the entire container */
+    background-position: center; /* Center the background image */
+    color: white; /* Text color */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .home_container h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+  
+  .shop_info {
+    background-color: rgba(100, 99, 99, 0.7); /* Semi-transparent black background for text */
+    padding: 20px;
+    border-radius: 10px;
+    width: 40%;
+  }
+  
+  .shop_info p {
+    margin: 10px 0;
+  }
+  
