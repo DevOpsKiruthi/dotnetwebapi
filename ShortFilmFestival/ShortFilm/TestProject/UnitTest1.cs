@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,7 +17,7 @@ namespace TestProject
     public class Tests
     {
         private ApplicationDbContext _context;
-        private StoreController _storeController;
+        private FilmsController _filmsController;
         private HttpClient _httpClient;
 
         [SetUp]
@@ -30,7 +31,7 @@ namespace TestProject
                 .Options;
 
             _context = new ApplicationDbContext(options);
-            _storeController = new StoreController(_context);
+            _filmsController = new FilmsController(_context);
         }
 
         [TearDown]
@@ -40,48 +41,49 @@ namespace TestProject
         }
 
         [Test]
-        public async Task Backend_Test_GetAllStoreItems_ReturnsSuccess()
+        public async Task Backend_Test_GetAllFilms_ReturnsSuccess()
         {
-            HttpResponseMessage response = await _httpClient.GetAsync("/getAllStoreitem");
+            HttpResponseMessage response = await _httpClient.GetAsync("/api/films");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             string responseBody = await response.Content.ReadAsStringAsync();
             Assert.IsNotEmpty(responseBody);
         }
 
         [Test]
-        public async Task Backend_Test_AddStoreItem_ReturnsSuccess()
+        public async Task Backend_Test_AddFilm_ReturnsSuccess()
         {
-            var newStoreData = new Dictionary<string, object>
+            var newFilmData = new Dictionary<string, object>
             {
-                { "ProductName", "Sample Product" },
-                { "Category", "Groceries" },
-                { "StockQuantity", 10 },
-                { "Price", 100 },
-                { "ExpiryDate", "2024-07-12" }
+                { "Title", "The Mysterious Forest" },
+                { "Director", "Ava Smith" },
+                { "Duration", 25 },
+                { "Synopsis", "A journey into the unknown." },
+                { "Genre", "Mystery" },
+                { "VoteCount", 0 }
             };
 
-            var newStore = CreateStoreObject(newStoreData);
-            var result = await _storeController.AddStoreItem(newStore);
+            var newFilm = CreateFilmObject(newFilmData);
+            var result = await _filmsController.AddFilm(newFilm);
             Assert.IsNotNull(result);
 
-            var createdStore = GetEntityFromDatabase<Store>(_context, "Stores", 1);
-            Assert.IsNotNull(createdStore);
-            Assert.AreEqual(newStore.ProductName, createdStore.ProductName);
+            var createdFilm = GetEntityFromDatabase<Film>(_context, "Films", 1);
+            Assert.IsNotNull(createdFilm);
+            Assert.AreEqual(newFilm.Title, createdFilm.Title);
         }
 
-        private Store CreateStoreObject(Dictionary<string, object> storeData)
+        private Film CreateFilmObject(Dictionary<string, object> filmData)
         {
-            var store = new Store();
-            foreach (var kvp in storeData)
+            var film = new Film();
+            foreach (var kvp in filmData)
             {
-                var property = typeof(Store).GetProperty(kvp.Key);
+                var property = typeof(Film).GetProperty(kvp.Key);
                 if (property != null)
                 {
                     var value = Convert.ChangeType(kvp.Value, property.PropertyType);
-                    property.SetValue(store, value);
+                    property.SetValue(film, value);
                 }
             }
-            return store;
+            return film;
         }
 
         private TEntity GetEntityFromDatabase<TEntity>(DbContext context, string collectionName, int id)
@@ -95,140 +97,122 @@ namespace TestProject
         }
 
         [Test]
-        public void Backend_Store_Id_PropertyExists_ReturnExpectedDataTypes_int()
+        public void Backend_Film_Id_PropertyExists_ReturnExpectedDataTypes_int()
         {
-            string assemblyName = "dotnetapp";
-            string typeName = "dotnetapp.Models.Store";
-            Assembly assembly = Assembly.Load(assemblyName);
-            Type storeType = assembly.GetType(typeName);
-            PropertyInfo propertyInfo = storeType.GetProperty("Id");
-            Assert.IsNotNull(propertyInfo, "Property Id does not exist in Store class");
+            var type = typeof(Film);
+            var propertyInfo = type.GetProperty("Id");
+            Assert.IsNotNull(propertyInfo);
             Assert.AreEqual(typeof(int), propertyInfo.PropertyType);
         }
 
         [Test]
-        public void Backend_Store_ProductName_PropertyExists_ReturnExpectedDataTypes_string()
+        public void Backend_Film_Title_PropertyExists_ReturnExpectedDataTypes_string()
         {
-            string assemblyName = "dotnetapp";
-            string typeName = "dotnetapp.Models.Store";
-            Assembly assembly = Assembly.Load(assemblyName);
-            Type storeType = assembly.GetType(typeName);
-            PropertyInfo propertyInfo = storeType.GetProperty("ProductName");
-            Assert.IsNotNull(propertyInfo, "Property ProductName does not exist in Store class");
+            var propertyInfo = typeof(Film).GetProperty("Title");
+            Assert.IsNotNull(propertyInfo);
             Assert.AreEqual(typeof(string), propertyInfo.PropertyType);
         }
 
         [Test]
-        public void Backend_Store_Category_PropertyExists_ReturnExpectedDataTypes_string()
+        public void Backend_Film_Director_PropertyExists_ReturnExpectedDataTypes_string()
         {
-            string assemblyName = "dotnetapp";
-            string typeName = "dotnetapp.Models.Store";
-            Assembly assembly = Assembly.Load(assemblyName);
-            Type storeType = assembly.GetType(typeName);
-            PropertyInfo propertyInfo = storeType.GetProperty("Category");
-            Assert.IsNotNull(propertyInfo, "Property Category does not exist in Store class");
+            var propertyInfo = typeof(Film).GetProperty("Director");
+            Assert.IsNotNull(propertyInfo);
             Assert.AreEqual(typeof(string), propertyInfo.PropertyType);
         }
 
         [Test]
-        public void Backend_Store_StockQuantity_PropertyExists_ReturnExpectedDataTypes_int()
+        public void Backend_Film_Duration_PropertyExists_ReturnExpectedDataTypes_int()
         {
-            string assemblyName = "dotnetapp";
-            string typeName = "dotnetapp.Models.Store";
-            Assembly assembly = Assembly.Load(assemblyName);
-            Type storeType = assembly.GetType(typeName);
-            PropertyInfo propertyInfo = storeType.GetProperty("StockQuantity");
-            Assert.IsNotNull(propertyInfo, "Property StockQuantity does not exist in Store class");
+            var propertyInfo = typeof(Film).GetProperty("Duration");
+            Assert.IsNotNull(propertyInfo);
             Assert.AreEqual(typeof(int), propertyInfo.PropertyType);
         }
 
         [Test]
-        public void Backend_Store_Price_PropertyExists_ReturnExpectedDataTypes_int()
+        public void Backend_Film_Synopsis_PropertyExists_ReturnExpectedDataTypes_string()
         {
-            string assemblyName = "dotnetapp";
-            string typeName = "dotnetapp.Models.Store";
-            Assembly assembly = Assembly.Load(assemblyName);
-            Type storeType = assembly.GetType(typeName);
-            PropertyInfo propertyInfo = storeType.GetProperty("Price");
-            Assert.IsNotNull(propertyInfo, "Property Price does not exist in Store class");
-            Assert.AreEqual(typeof(int), propertyInfo.PropertyType);
-        }
-
-        [Test]
-        public void Backend_Store_ExpiryDate_PropertyExists_ReturnExpectedDataTypes_string()
-        {
-            string assemblyName = "dotnetapp";
-            string typeName = "dotnetapp.Models.Store";
-            Assembly assembly = Assembly.Load(assemblyName);
-            Type storeType = assembly.GetType(typeName);
-            PropertyInfo propertyInfo = storeType.GetProperty("ExpiryDate");
-            Assert.IsNotNull(propertyInfo, "Property ExpiryDate does not exist in Store class");
+            var propertyInfo = typeof(Film).GetProperty("Synopsis");
+            Assert.IsNotNull(propertyInfo);
             Assert.AreEqual(typeof(string), propertyInfo.PropertyType);
         }
 
         [Test]
-        public void Backend_Test_StoreController_Class_Exists()
+        public void Backend_Film_Genre_PropertyExists_ReturnExpectedDataTypes_string()
         {
-            var _controllerType = typeof(StoreController);
-            Assert.NotNull(_controllerType);
+            var propertyInfo = typeof(Film).GetProperty("Genre");
+            Assert.IsNotNull(propertyInfo);
+            Assert.AreEqual(typeof(string), propertyInfo.PropertyType);
         }
 
         [Test]
-        public void Backend_Test_GetAllStoreItems_Method_Exists()
+        public void Backend_Film_VoteCount_PropertyExists_ReturnExpectedDataTypes_int()
         {
-            var _controllerType = typeof(StoreController);
-            var methodInfo = _controllerType.GetMethod("GetAllStoreItems");
+            var propertyInfo = typeof(Film).GetProperty("VoteCount");
+            Assert.IsNotNull(propertyInfo);
+            Assert.AreEqual(typeof(int), propertyInfo.PropertyType);
+        }
+
+        [Test]
+        public void Backend_Test_FilmsController_Class_Exists()
+        {
+            var controllerType = typeof(FilmsController);
+            Assert.NotNull(controllerType);
+        }
+
+        [Test]
+        public void Backend_Test_GetAllFilms_Method_Exists()
+        {
+            var methodInfo = typeof(FilmsController).GetMethod("GetAllFilms");
             Assert.NotNull(methodInfo);
         }
 
         [Test]
-        public void Backend_Test_GetAllStoreItems_Method_HasHttpGetAttribute()
+        public void Backend_Test_GetAllFilms_Method_HasHttpGetAttribute()
         {
-            var _controllerType = typeof(StoreController);
-            var methodInfo = _controllerType.GetMethod("GetAllStoreItems");
-            var httpGetAttribute = methodInfo.GetCustomAttributes(typeof(HttpGetAttribute), true).FirstOrDefault();
-            Assert.NotNull(httpGetAttribute);
+            var methodInfo = typeof(FilmsController).GetMethod("GetAllFilms");
+            var attribute = methodInfo.GetCustomAttributes(typeof(HttpGetAttribute), true).FirstOrDefault();
+            Assert.NotNull(attribute);
         }
 
         [Test]
-        public void Backend_Test_AddStoreItem_Method_Exists()
+        public void Backend_Test_AddFilm_Method_Exists()
         {
-            var _controllerType = typeof(StoreController);
-            var methodInfo = _controllerType.GetMethod("AddStoreItem");
+            var methodInfo = typeof(FilmsController).GetMethod("AddFilm");
             Assert.NotNull(methodInfo);
         }
 
         [Test]
-        public void Backend_Test_AddStoreItem_Method_HasHttpPostAttribute()
+        public void Backend_Test_AddFilm_Method_HasHttpPostAttribute()
         {
-            var _controllerType = typeof(StoreController);
-            var methodInfo = _controllerType.GetMethod("AddStoreItem");
-            var httpPostAttribute = methodInfo.GetCustomAttributes(typeof(HttpPostAttribute), true).FirstOrDefault();
-            Assert.NotNull(httpPostAttribute);
+            var methodInfo = typeof(FilmsController).GetMethod("AddFilm");
+            var attribute = methodInfo.GetCustomAttributes(typeof(HttpPostAttribute), true).FirstOrDefault();
+            Assert.NotNull(attribute);
         }
 
         [Test]
-        public async Task Backend_Test_AddStoreItem_Success()
+        public async Task Backend_Test_AddFilm_Success()
         {
-            var newStore = new Store
+            var newFilm = new Film
             {
-                ProductName = "Sample Product",
-                Category = "Groceries",
-                StockQuantity = 10,
-                Price = 100,
-                ExpiryDate = "2024-07-12"
+                Title = "The Final Hour",
+                Director = "Liam Scott",
+                Duration = 18,
+                Synopsis = "A gripping tale of time.",
+                Genre = "Thriller",
+                VoteCount = 0
             };
 
-            var result = await _storeController.AddStoreItem(newStore);
+            var result = await _filmsController.AddFilm(newFilm);
             var createdResult = result.Result as CreatedAtActionResult;
 
             Assert.IsNotNull(createdResult);
             Assert.AreEqual((int)HttpStatusCode.Created, createdResult.StatusCode);
-            
-            var addedStore = createdResult.Value as Store;
-            Assert.IsNotNull(addedStore);
-            Assert.AreEqual(newStore.ProductName, addedStore.ProductName);
-            Assert.AreEqual(newStore.Price, addedStore.Price);
+
+            var addedFilm = createdResult.Value as Film;
+            Assert.IsNotNull(addedFilm);
+            Assert.AreEqual(newFilm.Title, addedFilm.Title);
+            Assert.AreEqual(newFilm.Director, addedFilm.Director);
         }
     }
 }
