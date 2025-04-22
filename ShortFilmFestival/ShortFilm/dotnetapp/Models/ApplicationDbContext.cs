@@ -8,6 +8,6 @@ namespace dotnetapp.Models
         {
         }
 
-        public DbSet<Store> Stores { get; set; }
+        public DbSet<Film> Films { get; set; }
     }
 }
